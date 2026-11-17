@@ -8,12 +8,9 @@ VMGateway 是一個以「租約（lease）」為核心的小型服務，放在 A
 
 Agent 看不到任何虛擬化主機的密碼、主機 IP 或 API token，每個使用者只拿到一把自己的 API key。
 
-```
- Claude Code ──MCP──┐                         ┌── Proxmox VE 叢集     （Linux / Windows x86_64）
- 腳本 ─────────REST──┼──► VMGateway ──────────┼── Mac 上的 Tart       （macOS / Linux ARM64）
-                    │   租約 · 排程            └── Windows 上的 Hyper-V （Windows on ARM）
-                    │   回收 · SQLite
-```
+<p align="center">
+  <img src="docs/images/architecture.zh-TW.svg" alt="VMGateway 架構：agent 透過 MCP 或 REST 向 Gateway 租 VM，Gateway 在 Proxmox VE、Tart、Hyper-V 上建立 VM，agent 再直接用 SSH、RDP、VNC 連進 VM" width="100%">
+</p>
 
 ## 目錄
 

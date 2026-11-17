@@ -1,0 +1,485 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', Helvetica, Arial, sans-serif" role="img" aria-label="VMGateway architecture">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#151f3a"/></linearGradient>
+<linearGradient id="gw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#818cf8"/><stop offset="1" stop-color="#e879f9"/></linearGradient>
+<linearGradient id="gwfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#172033"/></linearGradient>
+<filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<marker id="c0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/></marker>
+<marker id="c1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f472b6"/></marker>
+<marker id="c2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#38bdf8"/></marker>
+<marker id="h0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fb923c"/></marker>
+<marker id="h1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker>
+<marker id="h2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
+<marker id="amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+<marker id="slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker>
+</defs>
+<rect width="1000" height="600" rx="22" fill="url(#bg)"/>
+<g fill="#1f2a44">
+<circle cx="30" cy="30" r="1.2"/>
+<circle cx="30" cy="70" r="1.2"/>
+<circle cx="30" cy="110" r="1.2"/>
+<circle cx="30" cy="150" r="1.2"/>
+<circle cx="30" cy="190" r="1.2"/>
+<circle cx="30" cy="230" r="1.2"/>
+<circle cx="30" cy="270" r="1.2"/>
+<circle cx="30" cy="310" r="1.2"/>
+<circle cx="30" cy="350" r="1.2"/>
+<circle cx="30" cy="390" r="1.2"/>
+<circle cx="30" cy="430" r="1.2"/>
+<circle cx="30" cy="470" r="1.2"/>
+<circle cx="30" cy="510" r="1.2"/>
+<circle cx="30" cy="550" r="1.2"/>
+<circle cx="30" cy="590" r="1.2"/>
+<circle cx="70" cy="30" r="1.2"/>
+<circle cx="70" cy="70" r="1.2"/>
+<circle cx="70" cy="110" r="1.2"/>
+<circle cx="70" cy="150" r="1.2"/>
+<circle cx="70" cy="190" r="1.2"/>
+<circle cx="70" cy="230" r="1.2"/>
+<circle cx="70" cy="270" r="1.2"/>
+<circle cx="70" cy="310" r="1.2"/>
+<circle cx="70" cy="350" r="1.2"/>
+<circle cx="70" cy="390" r="1.2"/>
+<circle cx="70" cy="430" r="1.2"/>
+<circle cx="70" cy="470" r="1.2"/>
+<circle cx="70" cy="510" r="1.2"/>
+<circle cx="70" cy="550" r="1.2"/>
+<circle cx="70" cy="590" r="1.2"/>
+<circle cx="110" cy="30" r="1.2"/>
+<circle cx="110" cy="70" r="1.2"/>
+<circle cx="110" cy="110" r="1.2"/>
+<circle cx="110" cy="150" r="1.2"/>
+<circle cx="110" cy="190" r="1.2"/>
+<circle cx="110" cy="230" r="1.2"/>
+<circle cx="110" cy="270" r="1.2"/>
+<circle cx="110" cy="310" r="1.2"/>
+<circle cx="110" cy="350" r="1.2"/>
+<circle cx="110" cy="390" r="1.2"/>
+<circle cx="110" cy="430" r="1.2"/>
+<circle cx="110" cy="470" r="1.2"/>
+<circle cx="110" cy="510" r="1.2"/>
+<circle cx="110" cy="550" r="1.2"/>
+<circle cx="110" cy="590" r="1.2"/>
+<circle cx="150" cy="30" r="1.2"/>
+<circle cx="150" cy="70" r="1.2"/>
+<circle cx="150" cy="110" r="1.2"/>
+<circle cx="150" cy="150" r="1.2"/>
+<circle cx="150" cy="190" r="1.2"/>
+<circle cx="150" cy="230" r="1.2"/>
+<circle cx="150" cy="270" r="1.2"/>
+<circle cx="150" cy="310" r="1.2"/>
+<circle cx="150" cy="350" r="1.2"/>
+<circle cx="150" cy="390" r="1.2"/>
+<circle cx="150" cy="430" r="1.2"/>
+<circle cx="150" cy="470" r="1.2"/>
+<circle cx="150" cy="510" r="1.2"/>
+<circle cx="150" cy="550" r="1.2"/>
+<circle cx="150" cy="590" r="1.2"/>
+<circle cx="190" cy="30" r="1.2"/>
+<circle cx="190" cy="70" r="1.2"/>
+<circle cx="190" cy="110" r="1.2"/>
+<circle cx="190" cy="150" r="1.2"/>
+<circle cx="190" cy="190" r="1.2"/>
+<circle cx="190" cy="230" r="1.2"/>
+<circle cx="190" cy="270" r="1.2"/>
+<circle cx="190" cy="310" r="1.2"/>
+<circle cx="190" cy="350" r="1.2"/>
+<circle cx="190" cy="390" r="1.2"/>
+<circle cx="190" cy="430" r="1.2"/>
+<circle cx="190" cy="470" r="1.2"/>
+<circle cx="190" cy="510" r="1.2"/>
+<circle cx="190" cy="550" r="1.2"/>
+<circle cx="190" cy="590" r="1.2"/>
+<circle cx="230" cy="30" r="1.2"/>
+<circle cx="230" cy="70" r="1.2"/>
+<circle cx="230" cy="110" r="1.2"/>
+<circle cx="230" cy="150" r="1.2"/>
+<circle cx="230" cy="190" r="1.2"/>
+<circle cx="230" cy="230" r="1.2"/>
+<circle cx="230" cy="270" r="1.2"/>
+<circle cx="230" cy="310" r="1.2"/>
+<circle cx="230" cy="350" r="1.2"/>
+<circle cx="230" cy="390" r="1.2"/>
+<circle cx="230" cy="430" r="1.2"/>
+<circle cx="230" cy="470" r="1.2"/>
+<circle cx="230" cy="510" r="1.2"/>
+<circle cx="230" cy="550" r="1.2"/>
+<circle cx="230" cy="590" r="1.2"/>
+<circle cx="270" cy="30" r="1.2"/>
+<circle cx="270" cy="70" r="1.2"/>
+<circle cx="270" cy="110" r="1.2"/>
+<circle cx="270" cy="150" r="1.2"/>
+<circle cx="270" cy="190" r="1.2"/>
+<circle cx="270" cy="230" r="1.2"/>
+<circle cx="270" cy="270" r="1.2"/>
+<circle cx="270" cy="310" r="1.2"/>
+<circle cx="270" cy="350" r="1.2"/>
+<circle cx="270" cy="390" r="1.2"/>
+<circle cx="270" cy="430" r="1.2"/>
+<circle cx="270" cy="470" r="1.2"/>
+<circle cx="270" cy="510" r="1.2"/>
+<circle cx="270" cy="550" r="1.2"/>
+<circle cx="270" cy="590" r="1.2"/>
+<circle cx="310" cy="30" r="1.2"/>
+<circle cx="310" cy="70" r="1.2"/>
+<circle cx="310" cy="110" r="1.2"/>
+<circle cx="310" cy="150" r="1.2"/>
+<circle cx="310" cy="190" r="1.2"/>
+<circle cx="310" cy="230" r="1.2"/>
+<circle cx="310" cy="270" r="1.2"/>
+<circle cx="310" cy="310" r="1.2"/>
+<circle cx="310" cy="350" r="1.2"/>
+<circle cx="310" cy="390" r="1.2"/>
+<circle cx="310" cy="430" r="1.2"/>
+<circle cx="310" cy="470" r="1.2"/>
+<circle cx="310" cy="510" r="1.2"/>
+<circle cx="310" cy="550" r="1.2"/>
+<circle cx="310" cy="590" r="1.2"/>
+<circle cx="350" cy="30" r="1.2"/>
+<circle cx="350" cy="70" r="1.2"/>
+<circle cx="350" cy="110" r="1.2"/>
+<circle cx="350" cy="150" r="1.2"/>
+<circle cx="350" cy="190" r="1.2"/>
+<circle cx="350" cy="230" r="1.2"/>
+<circle cx="350" cy="270" r="1.2"/>
+<circle cx="350" cy="310" r="1.2"/>
+<circle cx="350" cy="350" r="1.2"/>
+<circle cx="350" cy="390" r="1.2"/>
+<circle cx="350" cy="430" r="1.2"/>
+<circle cx="350" cy="470" r="1.2"/>
+<circle cx="350" cy="510" r="1.2"/>
+<circle cx="350" cy="550" r="1.2"/>
+<circle cx="350" cy="590" r="1.2"/>
+<circle cx="390" cy="30" r="1.2"/>
+<circle cx="390" cy="70" r="1.2"/>
+<circle cx="390" cy="110" r="1.2"/>
+<circle cx="390" cy="150" r="1.2"/>
+<circle cx="390" cy="190" r="1.2"/>
+<circle cx="390" cy="230" r="1.2"/>
+<circle cx="390" cy="270" r="1.2"/>
+<circle cx="390" cy="310" r="1.2"/>
+<circle cx="390" cy="350" r="1.2"/>
+<circle cx="390" cy="390" r="1.2"/>
+<circle cx="390" cy="430" r="1.2"/>
+<circle cx="390" cy="470" r="1.2"/>
+<circle cx="390" cy="510" r="1.2"/>
+<circle cx="390" cy="550" r="1.2"/>
+<circle cx="390" cy="590" r="1.2"/>
+<circle cx="430" cy="30" r="1.2"/>
+<circle cx="430" cy="70" r="1.2"/>
+<circle cx="430" cy="110" r="1.2"/>
+<circle cx="430" cy="150" r="1.2"/>
+<circle cx="430" cy="190" r="1.2"/>
+<circle cx="430" cy="230" r="1.2"/>
+<circle cx="430" cy="270" r="1.2"/>
+<circle cx="430" cy="310" r="1.2"/>
+<circle cx="430" cy="350" r="1.2"/>
+<circle cx="430" cy="390" r="1.2"/>
+<circle cx="430" cy="430" r="1.2"/>
+<circle cx="430" cy="470" r="1.2"/>
+<circle cx="430" cy="510" r="1.2"/>
+<circle cx="430" cy="550" r="1.2"/>
+<circle cx="430" cy="590" r="1.2"/>
+<circle cx="470" cy="30" r="1.2"/>
+<circle cx="470" cy="70" r="1.2"/>
+<circle cx="470" cy="110" r="1.2"/>
+<circle cx="470" cy="150" r="1.2"/>
+<circle cx="470" cy="190" r="1.2"/>
+<circle cx="470" cy="230" r="1.2"/>
+<circle cx="470" cy="270" r="1.2"/>
+<circle cx="470" cy="310" r="1.2"/>
+<circle cx="470" cy="350" r="1.2"/>
+<circle cx="470" cy="390" r="1.2"/>
+<circle cx="470" cy="430" r="1.2"/>
+<circle cx="470" cy="470" r="1.2"/>
+<circle cx="470" cy="510" r="1.2"/>
+<circle cx="470" cy="550" r="1.2"/>
+<circle cx="470" cy="590" r="1.2"/>
+<circle cx="510" cy="30" r="1.2"/>
+<circle cx="510" cy="70" r="1.2"/>
+<circle cx="510" cy="110" r="1.2"/>
+<circle cx="510" cy="150" r="1.2"/>
+<circle cx="510" cy="190" r="1.2"/>
+<circle cx="510" cy="230" r="1.2"/>
+<circle cx="510" cy="270" r="1.2"/>
+<circle cx="510" cy="310" r="1.2"/>
+<circle cx="510" cy="350" r="1.2"/>
+<circle cx="510" cy="390" r="1.2"/>
+<circle cx="510" cy="430" r="1.2"/>
+<circle cx="510" cy="470" r="1.2"/>
+<circle cx="510" cy="510" r="1.2"/>
+<circle cx="510" cy="550" r="1.2"/>
+<circle cx="510" cy="590" r="1.2"/>
+<circle cx="550" cy="30" r="1.2"/>
+<circle cx="550" cy="70" r="1.2"/>
+<circle cx="550" cy="110" r="1.2"/>
+<circle cx="550" cy="150" r="1.2"/>
+<circle cx="550" cy="190" r="1.2"/>
+<circle cx="550" cy="230" r="1.2"/>
+<circle cx="550" cy="270" r="1.2"/>
+<circle cx="550" cy="310" r="1.2"/>
+<circle cx="550" cy="350" r="1.2"/>
+<circle cx="550" cy="390" r="1.2"/>
+<circle cx="550" cy="430" r="1.2"/>
+<circle cx="550" cy="470" r="1.2"/>
+<circle cx="550" cy="510" r="1.2"/>
+<circle cx="550" cy="550" r="1.2"/>
+<circle cx="550" cy="590" r="1.2"/>
+<circle cx="590" cy="30" r="1.2"/>
+<circle cx="590" cy="70" r="1.2"/>
+<circle cx="590" cy="110" r="1.2"/>
+<circle cx="590" cy="150" r="1.2"/>
+<circle cx="590" cy="190" r="1.2"/>
+<circle cx="590" cy="230" r="1.2"/>
+<circle cx="590" cy="270" r="1.2"/>
+<circle cx="590" cy="310" r="1.2"/>
+<circle cx="590" cy="350" r="1.2"/>
+<circle cx="590" cy="390" r="1.2"/>
+<circle cx="590" cy="430" r="1.2"/>
+<circle cx="590" cy="470" r="1.2"/>
+<circle cx="590" cy="510" r="1.2"/>
+<circle cx="590" cy="550" r="1.2"/>
+<circle cx="590" cy="590" r="1.2"/>
+<circle cx="630" cy="30" r="1.2"/>
+<circle cx="630" cy="70" r="1.2"/>
+<circle cx="630" cy="110" r="1.2"/>
+<circle cx="630" cy="150" r="1.2"/>
+<circle cx="630" cy="190" r="1.2"/>
+<circle cx="630" cy="230" r="1.2"/>
+<circle cx="630" cy="270" r="1.2"/>
+<circle cx="630" cy="310" r="1.2"/>
+<circle cx="630" cy="350" r="1.2"/>
+<circle cx="630" cy="390" r="1.2"/>
+<circle cx="630" cy="430" r="1.2"/>
+<circle cx="630" cy="470" r="1.2"/>
+<circle cx="630" cy="510" r="1.2"/>
+<circle cx="630" cy="550" r="1.2"/>
+<circle cx="630" cy="590" r="1.2"/>
+<circle cx="670" cy="30" r="1.2"/>
+<circle cx="670" cy="70" r="1.2"/>
+<circle cx="670" cy="110" r="1.2"/>
+<circle cx="670" cy="150" r="1.2"/>
+<circle cx="670" cy="190" r="1.2"/>
+<circle cx="670" cy="230" r="1.2"/>
+<circle cx="670" cy="270" r="1.2"/>
+<circle cx="670" cy="310" r="1.2"/>
+<circle cx="670" cy="350" r="1.2"/>
+<circle cx="670" cy="390" r="1.2"/>
+<circle cx="670" cy="430" r="1.2"/>
+<circle cx="670" cy="470" r="1.2"/>
+<circle cx="670" cy="510" r="1.2"/>
+<circle cx="670" cy="550" r="1.2"/>
+<circle cx="670" cy="590" r="1.2"/>
+<circle cx="710" cy="30" r="1.2"/>
+<circle cx="710" cy="70" r="1.2"/>
+<circle cx="710" cy="110" r="1.2"/>
+<circle cx="710" cy="150" r="1.2"/>
+<circle cx="710" cy="190" r="1.2"/>
+<circle cx="710" cy="230" r="1.2"/>
+<circle cx="710" cy="270" r="1.2"/>
+<circle cx="710" cy="310" r="1.2"/>
+<circle cx="710" cy="350" r="1.2"/>
+<circle cx="710" cy="390" r="1.2"/>
+<circle cx="710" cy="430" r="1.2"/>
+<circle cx="710" cy="470" r="1.2"/>
+<circle cx="710" cy="510" r="1.2"/>
+<circle cx="710" cy="550" r="1.2"/>
+<circle cx="710" cy="590" r="1.2"/>
+<circle cx="750" cy="30" r="1.2"/>
+<circle cx="750" cy="70" r="1.2"/>
+<circle cx="750" cy="110" r="1.2"/>
+<circle cx="750" cy="150" r="1.2"/>
+<circle cx="750" cy="190" r="1.2"/>
+<circle cx="750" cy="230" r="1.2"/>
+<circle cx="750" cy="270" r="1.2"/>
+<circle cx="750" cy="310" r="1.2"/>
+<circle cx="750" cy="350" r="1.2"/>
+<circle cx="750" cy="390" r="1.2"/>
+<circle cx="750" cy="430" r="1.2"/>
+<circle cx="750" cy="470" r="1.2"/>
+<circle cx="750" cy="510" r="1.2"/>
+<circle cx="750" cy="550" r="1.2"/>
+<circle cx="750" cy="590" r="1.2"/>
+<circle cx="790" cy="30" r="1.2"/>
+<circle cx="790" cy="70" r="1.2"/>
+<circle cx="790" cy="110" r="1.2"/>
+<circle cx="790" cy="150" r="1.2"/>
+<circle cx="790" cy="190" r="1.2"/>
+<circle cx="790" cy="230" r="1.2"/>
+<circle cx="790" cy="270" r="1.2"/>
+<circle cx="790" cy="310" r="1.2"/>
+<circle cx="790" cy="350" r="1.2"/>
+<circle cx="790" cy="390" r="1.2"/>
+<circle cx="790" cy="430" r="1.2"/>
+<circle cx="790" cy="470" r="1.2"/>
+<circle cx="790" cy="510" r="1.2"/>
+<circle cx="790" cy="550" r="1.2"/>
+<circle cx="790" cy="590" r="1.2"/>
+<circle cx="830" cy="30" r="1.2"/>
+<circle cx="830" cy="70" r="1.2"/>
+<circle cx="830" cy="110" r="1.2"/>
+<circle cx="830" cy="150" r="1.2"/>
+<circle cx="830" cy="190" r="1.2"/>
+<circle cx="830" cy="230" r="1.2"/>
+<circle cx="830" cy="270" r="1.2"/>
+<circle cx="830" cy="310" r="1.2"/>
+<circle cx="830" cy="350" r="1.2"/>
+<circle cx="830" cy="390" r="1.2"/>
+<circle cx="830" cy="430" r="1.2"/>
+<circle cx="830" cy="470" r="1.2"/>
+<circle cx="830" cy="510" r="1.2"/>
+<circle cx="830" cy="550" r="1.2"/>
+<circle cx="830" cy="590" r="1.2"/>
+<circle cx="870" cy="30" r="1.2"/>
+<circle cx="870" cy="70" r="1.2"/>
+<circle cx="870" cy="110" r="1.2"/>
+<circle cx="870" cy="150" r="1.2"/>
+<circle cx="870" cy="190" r="1.2"/>
+<circle cx="870" cy="230" r="1.2"/>
+<circle cx="870" cy="270" r="1.2"/>
+<circle cx="870" cy="310" r="1.2"/>
+<circle cx="870" cy="350" r="1.2"/>
+<circle cx="870" cy="390" r="1.2"/>
+<circle cx="870" cy="430" r="1.2"/>
+<circle cx="870" cy="470" r="1.2"/>
+<circle cx="870" cy="510" r="1.2"/>
+<circle cx="870" cy="550" r="1.2"/>
+<circle cx="870" cy="590" r="1.2"/>
+<circle cx="910" cy="30" r="1.2"/>
+<circle cx="910" cy="70" r="1.2"/>
+<circle cx="910" cy="110" r="1.2"/>
+<circle cx="910" cy="150" r="1.2"/>
+<circle cx="910" cy="190" r="1.2"/>
+<circle cx="910" cy="230" r="1.2"/>
+<circle cx="910" cy="270" r="1.2"/>
+<circle cx="910" cy="310" r="1.2"/>
+<circle cx="910" cy="350" r="1.2"/>
+<circle cx="910" cy="390" r="1.2"/>
+<circle cx="910" cy="430" r="1.2"/>
+<circle cx="910" cy="470" r="1.2"/>
+<circle cx="910" cy="510" r="1.2"/>
+<circle cx="910" cy="550" r="1.2"/>
+<circle cx="910" cy="590" r="1.2"/>
+<circle cx="950" cy="30" r="1.2"/>
+<circle cx="950" cy="70" r="1.2"/>
+<circle cx="950" cy="110" r="1.2"/>
+<circle cx="950" cy="150" r="1.2"/>
+<circle cx="950" cy="190" r="1.2"/>
+<circle cx="950" cy="230" r="1.2"/>
+<circle cx="950" cy="270" r="1.2"/>
+<circle cx="950" cy="310" r="1.2"/>
+<circle cx="950" cy="350" r="1.2"/>
+<circle cx="950" cy="390" r="1.2"/>
+<circle cx="950" cy="430" r="1.2"/>
+<circle cx="950" cy="470" r="1.2"/>
+<circle cx="950" cy="510" r="1.2"/>
+<circle cx="950" cy="550" r="1.2"/>
+<circle cx="950" cy="590" r="1.2"/>
+<circle cx="990" cy="30" r="1.2"/>
+<circle cx="990" cy="70" r="1.2"/>
+<circle cx="990" cy="110" r="1.2"/>
+<circle cx="990" cy="150" r="1.2"/>
+<circle cx="990" cy="190" r="1.2"/>
+<circle cx="990" cy="230" r="1.2"/>
+<circle cx="990" cy="270" r="1.2"/>
+<circle cx="990" cy="310" r="1.2"/>
+<circle cx="990" cy="350" r="1.2"/>
+<circle cx="990" cy="390" r="1.2"/>
+<circle cx="990" cy="430" r="1.2"/>
+<circle cx="990" cy="470" r="1.2"/>
+<circle cx="990" cy="510" r="1.2"/>
+<circle cx="990" cy="550" r="1.2"/>
+<circle cx="990" cy="590" r="1.2"/>
+</g>
+<text x="40" y="58" font-size="30" font-weight="700" fill="#f8fafc">VM<tspan fill="url(#gw)">Gateway</tspan></text>
+<text x="40" y="84" font-size="15" fill="#94a3b8">以租約方式提供 VM 給 coding agent</text>
+<text x="40" y="128" font-size="11.5" font-weight="700" letter-spacing="1.6" fill="#64748b">AGENT</text>
+<text x="340" y="128" font-size="11.5" font-weight="700" letter-spacing="1.6" fill="#64748b">GATEWAY</text>
+<text x="730" y="128" font-size="11.5" font-weight="700" letter-spacing="1.6" fill="#64748b">你的虛擬化主機</text>
+<rect x="40" y="140" width="220" height="64" rx="14" fill="#1e293b" stroke="#a78bfa" stroke-width="1.6"/>
+<rect x="40" y="140" width="6" height="64" rx="3" fill="#a78bfa"/>
+<text x="62" y="170" font-size="15.5" font-weight="600" fill="#f1f5f9">Claude Code</text>
+<rect x="62" y="179" width="38" height="17" rx="8.5" fill="#a78bfa" fill-opacity="0.18"/>
+<text x="69" y="191.5" font-size="10.5" font-weight="700" fill="#a78bfa" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">MCP</text>
+<rect x="40" y="222" width="220" height="64" rx="14" fill="#1e293b" stroke="#f472b6" stroke-width="1.6"/>
+<rect x="40" y="222" width="6" height="64" rx="3" fill="#f472b6"/>
+<text x="62" y="252" font-size="15.5" font-weight="600" fill="#f1f5f9">VS Code · Cursor · Desktop</text>
+<rect x="62" y="261" width="38" height="17" rx="8.5" fill="#f472b6" fill-opacity="0.18"/>
+<text x="69" y="273.5" font-size="10.5" font-weight="700" fill="#f472b6" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">MCP</text>
+<rect x="40" y="304" width="220" height="64" rx="14" fill="#1e293b" stroke="#38bdf8" stroke-width="1.6"/>
+<rect x="40" y="304" width="6" height="64" rx="3" fill="#38bdf8"/>
+<text x="62" y="334" font-size="15.5" font-weight="600" fill="#f1f5f9">腳本 · CI</text>
+<rect x="62" y="343" width="46" height="17" rx="8.5" fill="#38bdf8" fill-opacity="0.18"/>
+<text x="69" y="355.5" font-size="10.5" font-weight="700" fill="#38bdf8" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">REST</text>
+<rect x="340" y="140" width="260" height="228" rx="18" fill="url(#gw)" opacity="0.35" filter="url(#glow)"/>
+<rect x="340" y="140" width="260" height="228" rx="18" fill="url(#gwfill)" stroke="url(#gw)" stroke-width="2.2"/>
+<text x="360" y="174" font-size="19" font-weight="700" fill="#f8fafc">VMGateway</text>
+<text x="360" y="194" font-size="11.5" fill="#94a3b8" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">/mcp · /v1</text>
+<rect x="360" y="210" width="107" height="32" rx="9" fill="#22d3ee" fill-opacity="0.12" stroke="#22d3ee" stroke-opacity="0.55"/>
+<circle cx="373" cy="226" r="3.5" fill="#22d3ee"/>
+<text x="383" y="230.5" font-size="12.5" fill="#e2e8f0">租約 · TTL</text>
+<rect x="473" y="210" width="107" height="32" rx="9" fill="#818cf8" fill-opacity="0.12" stroke="#818cf8" stroke-opacity="0.55"/>
+<circle cx="486" cy="226" r="3.5" fill="#818cf8"/>
+<text x="496" y="230.5" font-size="12.5" fill="#e2e8f0">排程</text>
+<rect x="360" y="252" width="107" height="32" rx="9" fill="#f472b6" fill-opacity="0.12" stroke="#f472b6" stroke-opacity="0.55"/>
+<circle cx="373" cy="268" r="3.5" fill="#f472b6"/>
+<text x="383" y="272.5" font-size="12.5" fill="#e2e8f0">到期回收</text>
+<rect x="473" y="252" width="107" height="32" rx="9" fill="#e879f9" fill-opacity="0.12" stroke="#e879f9" stroke-opacity="0.55"/>
+<circle cx="486" cy="268" r="3.5" fill="#e879f9"/>
+<text x="496" y="272.5" font-size="12.5" fill="#e2e8f0">孤兒對帳</text>
+<rect x="360" y="294" width="107" height="32" rx="9" fill="#a78bfa" fill-opacity="0.12" stroke="#a78bfa" stroke-opacity="0.55"/>
+<circle cx="373" cy="310" r="3.5" fill="#a78bfa"/>
+<text x="383" y="314.5" font-size="12.5" fill="#e2e8f0">API key</text>
+<rect x="473" y="294" width="107" height="32" rx="9" fill="#38bdf8" fill-opacity="0.12" stroke="#38bdf8" stroke-opacity="0.55"/>
+<circle cx="486" cy="310" r="3.5" fill="#38bdf8"/>
+<text x="496" y="314.5" font-size="12.5" fill="#e2e8f0">截圖</text>
+<text x="470.0" y="352" font-size="11" fill="#64748b" text-anchor="middle">SQLite · Docker · Python</text>
+<path d="M262,172 L336,172" fill="none" stroke="#a78bfa" stroke-width="2" marker-end="url(#c0)"/>
+<path d="M262,254 L336,254" fill="none" stroke="#f472b6" stroke-width="2" marker-end="url(#c1)"/>
+<path d="M262,336 L336,336" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#c2)"/>
+<text x="300" y="164" font-size="11" fill="#94a3b8" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">API key</text>
+<rect x="730" y="140" width="230" height="64" rx="14" fill="#1e293b" stroke="#fb923c" stroke-width="1.6"/>
+<rect x="954" y="140" width="6" height="64" rx="3" fill="#fb923c"/>
+<text x="748" y="168" font-size="15.5" font-weight="600" fill="#f1f5f9">Proxmox VE</text>
+<text x="748" y="189" font-size="12" fill="#fb923c">Linux · Windows x86_64</text>
+<rect x="900" y="154" width="11" height="11" rx="2.5" fill="#fb923c" fill-opacity="0.9"/>
+<rect x="915" y="154" width="11" height="11" rx="2.5" fill="#fb923c" fill-opacity="0.9"/>
+<rect x="930" y="154" width="11" height="11" rx="2.5" fill="#fb923c" fill-opacity="0.3"/>
+<path d="M602,172 L726,172" fill="none" stroke="#fb923c" stroke-width="2" marker-end="url(#h0)"/>
+<text x="664.0" y="164" font-size="10.5" fill="#fb923c" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace" paint-order="stroke" stroke="#0f172a" stroke-width="4">API token</text>
+<rect x="730" y="222" width="230" height="64" rx="14" fill="#1e293b" stroke="#34d399" stroke-width="1.6"/>
+<rect x="954" y="222" width="6" height="64" rx="3" fill="#34d399"/>
+<text x="748" y="250" font-size="15.5" font-weight="600" fill="#f1f5f9">Mac 上的 Tart</text>
+<text x="748" y="271" font-size="12" fill="#34d399">macOS · Linux ARM64</text>
+<rect x="900" y="236" width="11" height="11" rx="2.5" fill="#34d399" fill-opacity="0.9"/>
+<rect x="915" y="236" width="11" height="11" rx="2.5" fill="#34d399" fill-opacity="0.9"/>
+<rect x="930" y="236" width="11" height="11" rx="2.5" fill="#34d399" fill-opacity="0.3"/>
+<path d="M602,254 L726,254" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#h1)"/>
+<text x="664.0" y="246" font-size="10.5" fill="#34d399" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace" paint-order="stroke" stroke="#0f172a" stroke-width="4">SSH · tart</text>
+<rect x="730" y="304" width="230" height="64" rx="14" fill="#1e293b" stroke="#60a5fa" stroke-width="1.6"/>
+<rect x="954" y="304" width="6" height="64" rx="3" fill="#60a5fa"/>
+<text x="748" y="332" font-size="15.5" font-weight="600" fill="#f1f5f9">Hyper-V</text>
+<text x="748" y="353" font-size="12" fill="#60a5fa">Windows on ARM</text>
+<rect x="900" y="318" width="11" height="11" rx="2.5" fill="#60a5fa" fill-opacity="0.9"/>
+<rect x="915" y="318" width="11" height="11" rx="2.5" fill="#60a5fa" fill-opacity="0.9"/>
+<rect x="930" y="318" width="11" height="11" rx="2.5" fill="#60a5fa" fill-opacity="0.3"/>
+<path d="M602,336 L726,336" fill="none" stroke="#60a5fa" stroke-width="2" marker-end="url(#h2)"/>
+<text x="664.0" y="328" font-size="10.5" fill="#60a5fa" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace" paint-order="stroke" stroke="#0f172a" stroke-width="4">SSH · PowerShell</text>
+<path d="M150,370 L150,404 Q150,414 160,414 L835,414 Q845,414 845,404 L845,372" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#amber)"/>
+<text x="500" y="438" font-size="13" fill="#fbbf24" text-anchor="middle" font-weight="600">SSH · RDP · VNC：agent 直接連進自己的 VM</text>
+<rect x="40" y="472" width="920" height="96" rx="16" fill="#111a2e" stroke="#1f2a44"/>
+<text x="62" y="515" font-size="11.5" font-weight="700" letter-spacing="1.6" fill="#64748b">租約</text>
+<rect x="130" y="494" width="118" height="30" rx="15" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24"/>
+<text x="189.0" y="514" font-size="12.5" fill="#fbbf24" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">provisioning</text>
+<path d="M253,509 L273,509" stroke="#64748b" stroke-width="1.8" marker-end="url(#slate)"/>
+<rect x="280" y="494" width="76" height="30" rx="15" fill="#34d399" fill-opacity="0.16" stroke="#34d399"/>
+<text x="318.0" y="514" font-size="12.5" fill="#34d399" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">ready</text>
+<path d="M361,509 L381,509" stroke="#64748b" stroke-width="1.8" marker-end="url(#slate)"/>
+<rect x="388" y="494" width="100" height="30" rx="15" fill="#94a3b8" fill-opacity="0.16" stroke="#94a3b8"/>
+<text x="438.0" y="514" font-size="12.5" fill="#94a3b8" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">releasing</text>
+<path d="M493,509 L513,509" stroke="#64748b" stroke-width="1.8" marker-end="url(#slate)"/>
+<rect x="520" y="494" width="96" height="30" rx="15" fill="#64748b" fill-opacity="0.16" stroke="#64748b"/>
+<text x="568.0" y="514" font-size="12.5" fill="#64748b" text-anchor="middle" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">released</text>
+<text x="642" y="514" font-size="12" fill="#f87171" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace">+ failed · expired</text>
+<text x="130" y="550" font-size="12.5" fill="#cbd5e1">期限 10 分鐘–72 小時 · 預設 2 小時 · 到期自動刪除</text>
+</svg>

@@ -11,12 +11,9 @@ is reachable, and hands back the IP, ports and login. When the lease ends, the V
 
 Agents never see hypervisor passwords, host IPs or API tokens. Each user has an API key.
 
-```
- Claude Code ──MCP──┐                         ┌── Proxmox VE cluster  (Linux / Windows x86_64)
- scripts ─────REST──┼──► VMGateway ──────────┼── Tart on a Mac        (macOS / Linux ARM64)
-                    │   leases · scheduler    └── Hyper-V on Windows   (Windows on ARM)
-                    │   reaper · SQLite
-```
+<p align="center">
+  <img src="docs/images/architecture.svg" alt="VMGateway architecture: agents lease VMs from the gateway over MCP or REST; the gateway creates them on Proxmox VE, Tart and Hyper-V; agents then connect to their VM directly over SSH, RDP or VNC" width="100%">
+</p>
 
 ## Features
 
