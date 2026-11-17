@@ -139,6 +139,8 @@ Credential modes:
 | `renew_vm(lease_id, ttl_minutes)` | extend |
 | `screenshot_vm(lease_id, max_width=1600)` | the VM's screen as a PNG image |
 | `destroy_vm(lease_id)` | end the lease now |
+| `create_api_key(name, admin?, max_leases?)` | admin: new key + ready-to-paste client setup |
+| `list_api_keys()` / `revoke_api_key(name)` | admin: manage keys |
 
 ## REST API
 
@@ -159,11 +161,18 @@ Errors are JSON: `{"error": "no_capacity", "detail": "..."}`.
 
 ## User management
 
+The easiest way: as an admin, just ask your agent — *"create an API key for my laptop"*. The
+`create_api_key` tool returns the key plus a one-line `claude mcp add ...` command (and VS Code, Cursor,
+Claude Desktop configs) to paste on the new machine. `list_api_keys` and `revoke_api_key` do the rest.
+The same is available over REST (`POST/GET /v1/users`, `DELETE /v1/users/{name}`, admin only) and the CLI:
+
 ```bash
 vmgw user add bob --max-leases 3
 vmgw user list
 vmgw user revoke bob
 ```
+
+The last active admin cannot be revoked.
 
 ## Development
 

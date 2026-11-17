@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
-from .auth import authenticate
+from .auth import authenticate, create_user, install_snippets, require_admin, revoke_user, user_view
 from .errors import GatewayError
 from .leases import LeaseManager
 from .models import User
@@ -29,6 +29,12 @@ class CreateLease(BaseModel):
 
 class Renew(BaseModel):
     ttl_minutes: int
+
+
+class NewUser(BaseModel):
+    name: str
+    admin: bool = False
+    max_leases: int | None = None
 
 
 def get_manager(request: Request) -> LeaseManager:
@@ -124,6 +130,30 @@ async def delete_lease(
     lease_id: str, user: User = Depends(current_user), mgr: LeaseManager = Depends(get_manager)
 ):
     return lease_view(await mgr.destroy(user, lease_id), include_secrets=False)
+
+
+@router.post("/users", status_code=201)
+async def add_user(
+    body: NewUser, user: User = Depends(current_user), mgr: LeaseManager = Depends(get_manager)
+):
+    require_admin(user)
+    key = await create_user(mgr.store, body.name, body.admin, body.max_leases)
+    return {"name": body.name, "api_key": key, "install": install_snippets(mgr.config.server.public_url, key)}
+
+
+@router.get("/users")
+async def get_users(user: User = Depends(current_user), mgr: LeaseManager = Depends(get_manager)):
+    require_admin(user)
+    return [user_view(u) for u in await mgr.store.list_users()]
+
+
+@router.delete("/users/{name}")
+async def delete_user(
+    name: str, user: User = Depends(current_user), mgr: LeaseManager = Depends(get_manager)
+):
+    require_admin(user)
+    await revoke_user(mgr.store, name)
+    return {"name": name, "revoked": True}
 
 
 def install(app: FastAPI) -> None:

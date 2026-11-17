@@ -8,7 +8,7 @@ from mcp.server.auth.settings import AuthSettings
 from mcp.server.mcpserver import Image
 
 from .api import collect_capacity
-from .auth import ApiKeyVerifier
+from .auth import ApiKeyVerifier, create_user, install_snippets, require_admin, revoke_user, user_view
 from .errors import GatewayError
 from .leases import LeaseManager
 from .models import LeaseState, User
@@ -130,5 +130,38 @@ def build_mcp(mgr: LeaseManager) -> MCPServer:
     async def destroy_vm(lease_id: str) -> dict:
         user = await caller()
         return lease_view(await mgr.destroy(user, lease_id), include_secrets=False)
+
+    # ---- admin: API keys -------------------------------------------------------------------
+
+    @mcp.tool(
+        description=(
+            "ADMIN ONLY. Create an API key for a new person or machine and return it together with"
+            " ready-to-paste setup for Claude Code (one command), VS Code, Cursor and Claude Desktop."
+            " The key is shown only once: hand the user the install command verbatim."
+        )
+    )
+    async def create_api_key(name: str, admin: bool = False, max_leases: int | None = None) -> dict:
+        user = await caller()
+        require_admin(user)
+        key = await create_user(mgr.store, name, admin, max_leases)
+        return {
+            "name": name,
+            "api_key": key,
+            "install": install_snippets(mgr.config.server.public_url, key),
+            "note": "Shown once. Run install.claude_code on the target machine.",
+        }
+
+    @mcp.tool(description="ADMIN ONLY. List API key holders (names, admin flag, quota, revoked).")
+    async def list_api_keys() -> list[dict]:
+        user = await caller()
+        require_admin(user)
+        return [user_view(u) for u in await mgr.store.list_users()]
+
+    @mcp.tool(description="ADMIN ONLY. Revoke a user's API key immediately (their leases keep running).")
+    async def revoke_api_key(name: str) -> dict:
+        user = await caller()
+        require_admin(user)
+        await revoke_user(mgr.store, name)
+        return {"name": name, "revoked": True}
 
     return mcp

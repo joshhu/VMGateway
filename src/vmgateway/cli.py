@@ -5,14 +5,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
 
-from .auth import generate_key, hash_key
+from .auth import create_user, revoke_user
 from .config import ConfigError, GatewayConfig, load_config
-from .models import User
+from .errors import GatewayError
 from .store import Store
 
 app = typer.Typer(help="VMGateway: lease VMs to coding agents.", no_args_is_help=True)
@@ -82,14 +81,10 @@ def user_add(
 ):
     """Create a user and print its API key (shown once)."""
     cfg = _config(config)
-    key = generate_key()
-    user = User(
-        name=name, key_hash=hash_key(key), is_admin=admin, max_leases=max_leases, created_at=datetime.now(UTC)
-    )
     try:
-        _store_call(cfg, lambda s: s.add_user(user))
-    except ValueError as e:
-        typer.secho(str(e), fg="red", err=True)
+        key = _store_call(cfg, lambda s: create_user(s, name, admin, max_leases))
+    except GatewayError as e:
+        typer.secho(e.detail, fg="red", err=True)
         raise typer.Exit(1) from e
     typer.echo(key)
 
@@ -107,7 +102,9 @@ def user_list(config: Path = ConfigOpt):
 @user_app.command("revoke")
 def user_revoke(name: str, config: Path = ConfigOpt):
     cfg = _config(config)
-    if not _store_call(cfg, lambda s: s.revoke_user(name)):
-        typer.secho(f"no such user {name}", fg="red", err=True)
-        raise typer.Exit(1)
+    try:
+        _store_call(cfg, lambda s: revoke_user(s, name))
+    except GatewayError as e:
+        typer.secho(e.detail, fg="red", err=True)
+        raise typer.Exit(1) from e
     typer.echo(f"revoked {name}")

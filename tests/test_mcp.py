@@ -63,6 +63,9 @@ async def test_tools_listed_with_template_catalog(gw):
         "renew_vm",
         "destroy_vm",
         "screenshot_vm",
+        "create_api_key",
+        "list_api_keys",
+        "revoke_api_key",
     }
     assert "ubuntu: Ubuntu 24.04" in tools["create_vm"].description
 
