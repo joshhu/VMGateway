@@ -26,6 +26,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 function Log($msg) { Write-Host ("[{0:HH:mm:ss}] {1}" -f (Get-Date), $msg) }
 
@@ -77,7 +78,9 @@ Remove-Item "$env:WINDIR\Temp\vmgw-seal.ps1" -Force -ErrorAction SilentlyContinu
 $guestPrep = {
     param($sealScript)
     $ErrorActionPreference = 'Stop'
-    Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
+    # RDP is enabled by unattend (fDenyTSConnections); some builds refuse this write even for admins.
+    Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0 `
+        -ErrorAction SilentlyContinue
     if (-not (Get-Service sshd -ErrorAction SilentlyContinue)) {
         $cap = Get-WindowsCapability -Online -Name 'OpenSSH.Server*' | Select-Object -First 1
         Add-WindowsCapability -Online -Name $cap.Name | Out-Null
@@ -151,7 +154,7 @@ try {
             break
         } catch {
             if ((Get-Date) -gt $deadline) { throw "guest preparation failed: $_" }
-            Log "prep not ready yet ($($_.Exception.Message)); retrying"
+            Log "prep not ready yet: $($_.Exception.Message) [at: $($_.InvocationInfo.Line.Trim())]; retrying"
             Start-Sleep -Seconds 15
         }
     }

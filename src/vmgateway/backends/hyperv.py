@@ -105,7 +105,8 @@ def parse_mapping(description: str) -> dict[str, int]:
 
 GUEST_SETUP = r"""
 param([bool]$wantSsh, [string]$pubKey)
-Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
+# RDP itself is enabled by unattend.xml; some builds refuse this write even for admins.
+Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0 -ErrorAction SilentlyContinue
 Enable-NetFirewallRule -Group '@FirewallAPI.dll,-28752' -ErrorAction SilentlyContinue
 Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 New-NetFirewallRule -Name vmgw-rdp -DisplayName 'RDP (vmgw)' -Protocol TCP -LocalPort 3389 -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
