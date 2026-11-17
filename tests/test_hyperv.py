@@ -129,3 +129,15 @@ async def test_destroy_script_and_guard(backend, runner):
 
 async def test_list_managed_dedupes(backend):
     assert [r.name for r in await backend.list_managed()] == ["vmgw-aaa", "vmgw-bbb"]
+
+
+def test_unattend_grants_full_admin_token():
+    xml = unattend_xml("VMGW-ABC", Credentials(username="agent", password="Pw-12345678"))
+    cmd = ET.fromstring(xml).find(".//u:RunSynchronousCommand/u:Path", NS).text
+    assert "LocalAccountTokenFilterPolicy" in cmd and "/d 1" in cmd
+
+
+def test_unattend_keeps_display_on():
+    xml = unattend_xml("VMGW-ABC", Credentials(username="agent", password="Pw-12345678"))
+    paths = [p.text for p in ET.fromstring(xml).findall(".//u:RunSynchronousCommand/u:Path", NS)]
+    assert any("monitor-timeout-ac 0" in p and "&" in p for p in paths)

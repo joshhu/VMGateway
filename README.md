@@ -103,17 +103,10 @@ source per node in the template's `sources`. Windows templates need the QEMU gue
   it with the network **disconnected** (otherwise OOBE may install a zero-day update, reboot and stop at the
   interactive account page), waits over PowerShell Direct, connects the network, then enables RDP (and
   OpenSSH if requested).
-- OpenSSH from Windows Update takes minutes on every first boot. Bake it into the template once:
-
-  ```powershell
-  pwsh -File scripts/hyperv/build-openssh-template.ps1 `
-    -SourceVhdx C:\VMs\Templates\win11.vhdx -OutVhdx C:\VMs\Templates\win11-openssh.vhdx -Locale en-US
-  ```
-
-  It boots a throw-away VM, installs OpenSSH Server, removes its temporary account, runs
-  `sysprep /generalize /oobe`, and merges the result into a new read-only VHDX. The source is untouched.
-- With a NAT switch (`Default Switch`), each lease gets ports from `port_range` forwarded from
-  `public_ip` with `netsh interface portproxy`, plus a firewall rule named after the VM.
+- OpenSSH Server, when a template lists the `ssh` endpoint but the VHDX lacks it, is installed from Windows
+  Update on first boot (several minutes). Prefer a template with OpenSSH preinstalled.
+- The lease unattend sets `LocalAccountTokenFilterPolicy=1` so the lease's local admin gets a full token over
+  PowerShell Direct (needed for guest setup), and disables display/standby timeouts so screenshots stay live.
 
 ## Configuration
 
@@ -186,6 +179,8 @@ VMGW_LIVE_USER='me:Secret-Pass1' ...                                         # w
 - Lease credentials are stored in the gateway's SQLite file; protect `data/`.
 - The PVE token can only manage VMs in pool `vmgw` and clone templates in `vmgw-templates`.
 - The gateway trusts the LAN: SSH host keys are not verified unless `known_hosts` is set per host.
+- Hyper-V leases enable `LocalAccountTokenFilterPolicy` (remote admin for local accounts) inside the guest;
+  each lease has its own random password.
 
 ## License
 

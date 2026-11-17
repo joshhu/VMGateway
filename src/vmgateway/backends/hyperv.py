@@ -39,6 +39,14 @@ def _check_name(name: str) -> str:
 _COMPONENT = 'processorArchitecture="{arch}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"'
 
 
+# Without this, UAC hands local admins a filtered (non-elevated) token over PowerShell Direct once OOBE is
+# done, and guest setup (firewall, OpenSSH, power settings) fails with "requires elevation".
+TOKEN_FILTER_CMD = (
+    r"reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+    r" /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f"
+)
+
+
 def unattend_xml(computer_name: str, creds: Credentials, arch: str = "arm64", locale: str = "en-US") -> str:
     a = _COMPONENT.format(arch="arm64" if arch == "arm64" else "amd64")
     user, pw, loc = escape(creds.username), escape(creds.password or ""), escape(locale)
@@ -50,6 +58,20 @@ def unattend_xml(computer_name: str, creds: Credentials, arch: str = "arm64", lo
     </component>
     <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" {a}>
       <fDenyTSConnections>false</fDenyTSConnections>
+    </component>
+    <component name="Microsoft-Windows-Deployment" {a}>
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Description>Full admin token for local accounts over PowerShell Direct / remoting</Description>
+          <Path>{TOKEN_FILTER_CMD}</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <Description>Never blank the console (screenshots)</Description>
+          <Path>cmd /c powercfg /change monitor-timeout-ac 0 &amp; powercfg /change standby-timeout-ac 0</Path>
+        </RunSynchronousCommand>
+      </RunSynchronous>
     </component>
   </settings>
   <settings pass="oobeSystem">
@@ -135,7 +157,8 @@ try {
   $max = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
   if ($max -gt (Get-Partition -DriveLetter C).Size + 1GB) { Resize-Partition -DriveLetter C -Size $max }
 } catch {}
-[pscustomobject]@{ ok = $true; ssh = $ssh; host = $env:COMPUTERNAME } | ConvertTo-Json -Compress
+$errs = @($Error | ForEach-Object { $_.Exception.Message } | Select-Object -Unique -First 5)
+[pscustomobject]@{ ok = $true; ssh = $ssh; host = $env:COMPUTERNAME; errors = $errs } | ConvertTo-Json -Compress
 """
 
 
