@@ -1,0 +1,57 @@
+[project]
+name = "vmgateway"
+version = "0.1.0"
+description = "Lease-based VM gateway (REST + MCP) that lets coding agents spin up VMs on Proxmox VE, Tart and Hyper-V"
+readme = "README.md"
+authors = [
+    { name = "Josh Hu", email = "josh.hu@yahoo.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "asyncssh>=2.24.1",
+    "fastapi>=0.163.1",
+    "mcp>=2.3,<3",
+    "proxmoxer>=2.3.0",
+    "pydantic>=2.14.3",
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+    "typer>=0.29.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+vmgw = "vmgateway.cli:app"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = ["live: hits real hypervisors (set VMGW_LIVE=1)"]
+addopts = "-m 'not live'"
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+extend-ignore = ["B008"]  # FastAPI Depends()/Header() defaults
+
+[tool.ruff.lint.per-file-ignores]
+# Lease teardown, reaper and reconcile must survive any backend failure.
+"src/vmgateway/leases.py" = ["BLE001"]
+
+[build-system]
+requires = ["uv_build>=0.9.8,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "ruff>=0.17.5",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

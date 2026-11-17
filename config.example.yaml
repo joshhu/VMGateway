@@ -1,0 +1,113 @@
+# VMGateway configuration. Copy to config.yaml and adjust.
+# Secrets never go here: fields ending in _env name an environment variable (see .env.example).
+
+server:
+  listen: 0.0.0.0
+  port: 8000
+  # URL agents use to reach the gateway (also advertised in MCP auth metadata).
+  public_url: http://vmgateway.lan:8000
+  # Host headers the MCP endpoint accepts (DNS-rebinding protection). "host:*" = any port.
+  allowed_hosts: ["vmgateway.lan:*", "10.0.0.50:*", "127.0.0.1:*", "localhost:*"]
+  db_path: data/vmgw.db
+
+policy:
+  ttl_min_minutes: 10
+  ttl_default_minutes: 120
+  ttl_max_minutes: 4320        # 72 h
+  default_max_leases: 5        # per user, unless `vmgw user add --max-leases`
+  reaper_interval_s: 60
+  reconcile_interval_s: 600    # orphan vmgw-* VMs are destroyed
+
+hosts:
+  # Proxmox VE (cluster or single node). Create the token with scripts/pve/bootstrap-token.sh.
+  - name: pve
+    type: proxmox
+    url: https://pve.lan:8006
+    token_id: vmgw@pve!gateway
+    token_secret_env: PVE_TOKEN_SECRET
+    verify_ssl: false
+    pool: vmgw                 # every leased VM lands in this pool
+    max_vms: 10                # per node
+
+  # Apple Silicon Mac with Tart (https://tart.run). Gateway SSHes in with a key.
+  - name: macmini
+    type: tart
+    ssh: {host: macmini.lan, user: me, key_path: /keys/macmini}
+    tart_bin: /opt/homebrew/bin/tart
+    bridged_interface: en0     # VMs get LAN addresses; null = Tart NAT (reachable only from the Mac)
+    max_macos_vms: 2           # Apple's limit on concurrently running macOS guests
+
+  # Windows Hyper-V host with OpenSSH Server + PowerShell 7.
+  - name: hyperv
+    type: hyperv
+    ssh: {host: winhost.lan, user: me, key_path: /keys/winhost}
+    vm_root: 'C:\VMs\vmgw'
+    switch: Default Switch     # NAT; agents reach VMs through port forwarding on public_ip
+    public_ip: 10.0.0.46
+    port_range: [40000, 40999]
+    max_vms: 3
+
+templates:
+  # PVE template built by scripts/pve/build-ubuntu-templates.sh (one per node: local storage).
+  - id: ubuntu-24.04
+    description: Ubuntu Server 24.04 LTS (x86_64)
+    os: linux
+    arch: amd64
+    host_type: proxmox
+    sources:
+      - {host: pve, node: pve1, ref: "9024"}
+      - {host: pve, node: pve2, ref: "9124"}
+    defaults: {cpu: 2, memory_gb: 4, disk_gb: 20}
+    credentials: {mode: cloudinit, username: agent}   # per-lease password + SSH key
+    endpoints: [ssh]
+    ready_timeout_s: 300
+
+  # Existing Windows template on PVE with a fixed local account.
+  - id: win11
+    description: Windows 11 Pro (x86_64)
+    os: windows
+    arch: amd64
+    host_type: proxmox
+    sources:
+      - {host: pve, node: pve1, ref: "100"}
+    defaults: {cpu: 4, memory_gb: 8, disk_gb: 100}
+    credentials: {mode: static, username: user, password_env: PVE_WIN11_PASSWORD}
+    endpoints: [rdp]
+    ready_timeout_s: 900
+
+  - id: macos
+    description: macOS (Apple Silicon, Tart)
+    os: macos
+    arch: arm64
+    host_type: tart
+    sources:
+      - {host: macmini, ref: macos-template}
+    defaults: {cpu: 4, memory_gb: 8, disk_gb: 100}
+    credentials: {mode: static, username: admin, password_env: TART_MACOS_PASSWORD}
+    endpoints: [ssh, vnc]
+    ready_timeout_s: 600
+
+  - id: ubuntu-24.04-arm
+    description: Ubuntu 24.04 ARM64 (Tart)
+    os: linux
+    arch: arm64
+    host_type: tart
+    sources:
+      - {host: macmini, ref: "ghcr.io/cirruslabs/ubuntu:24.04"}
+    defaults: {cpu: 2, memory_gb: 4, disk_gb: 20}
+    credentials: {mode: static, username: admin, password_env: TART_UBUNTU_PASSWORD}
+    endpoints: [ssh]
+
+  # Sysprepped VHDX (boots to OOBE). Gateway injects unattend.xml with a per-lease admin password.
+  - id: win11-arm
+    description: Windows 11 Pro ARM64 (Hyper-V)
+    os: windows
+    arch: arm64
+    host_type: hyperv
+    sources:
+      - {host: hyperv, ref: 'C:\VMs\Templates\win11-arm64.vhdx'}
+    defaults: {cpu: 4, memory_gb: 8, disk_gb: 64}
+    credentials: {mode: unattend, username: agent}
+    endpoints: [rdp, ssh]
+    windows_locale: en-US
+    ready_timeout_s: 1200

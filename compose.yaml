@@ -1,0 +1,12 @@
+services:
+  vmgateway:
+    build: .
+    image: vmgateway:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./data:/app/data          # SQLite: users + leases
+      - ./keys:/keys:ro           # SSH private keys for Tart / Hyper-V hosts
