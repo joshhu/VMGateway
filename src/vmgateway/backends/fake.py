@@ -82,6 +82,15 @@ class FakeBackend:
         self.applied.append((current.username, current.password, desired.username, desired.password))
         return desired
 
+    async def screenshot(self, ref: VMRef) -> bytes:
+        import io
+
+        from PIL import Image
+
+        out = io.BytesIO()
+        Image.new("RGB", (64, 48), (0, 120, 215)).save(out, "PNG")
+        return out.getvalue()
+
     async def destroy(self, ref: VMRef) -> None:
         if "destroy" in self.fail_on:
             raise BackendError("fake destroy failure")

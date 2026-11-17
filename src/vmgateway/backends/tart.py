@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import shlex
 import time
 
@@ -90,7 +91,8 @@ class TartBackend:
         if resources.disk_gb > int(info.get("Disk", 0)):
             args += ["--disk-size", str(resources.disk_gb)]
         await self.ssh.run(self._tart(*args))
-        run = ["run", name, "--no-graphics"]
+        # --vnc-experimental: host-side Virtualization.framework VNC, used for screenshots.
+        run = ["run", name, "--no-graphics", "--vnc-experimental"]
         if self.cfg.bridged_interface:
             run.append(f"--net-bridged={self.cfg.bridged_interface}")
         log_file = f"~/.vmgw/{name}.log"
@@ -126,8 +128,11 @@ class TartBackend:
             if time.monotonic() > deadline:
                 raise BackendError(f"{ref.vm_id}: {first.proto} on {ip}:{first.port} not reachable")
             await asyncio.sleep(self.poll_s)
-        if template.os == "macos" and "vnc" in template.endpoints and creds and creds.password:
-            await self._enable_screen_sharing(ip, creds, deadline)
+        if template.os == "macos" and creds and creds.password:
+            # Keep the display awake so screenshots are never black.
+            await self._guest(ip, creds, "pmset -a displaysleep 0 sleep 0; true", sudo=True)
+            if "vnc" in template.endpoints:
+                await self._enable_screen_sharing(ip, creds, deadline)
         return Access(ip=ip, endpoints=endpoints)
 
     async def _guest(self, ip: str, creds: Credentials, command: str, sudo: bool = False) -> str:
@@ -175,6 +180,20 @@ class TartBackend:
         await self._guest(access.ip, current, cmd, sudo=True)
         await guest_run(access.ip, DEFAULT_PORTS["ssh"], u, pw, "true")  # prove the new login works
         return Credentials(username=u, password=pw)
+
+    async def screenshot(self, ref: VMRef) -> bytes:
+        from .vnc import StreamReaderWriter, capture
+
+        name = _check_name(ref.vm_id)
+        log_text = await self.ssh.run(f"cat ~/.vmgw/{name}.log", check=False)
+        m = re.search(r"vnc://:([^@\s]*)@127\.0\.0\.1:(\d+)", log_text)
+        if not m:
+            raise BackendError(f"{name}: no VNC server (VM started without --vnc-experimental?)")
+        reader, writer = await self.ssh.open_tcp("127.0.0.1", int(m.group(2)))
+        try:
+            return await capture(StreamReaderWriter(reader, writer), m.group(1))
+        finally:
+            writer.close()
 
     async def destroy(self, ref: VMRef) -> None:
         name = _check_name(ref.vm_id)

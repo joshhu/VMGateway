@@ -5,6 +5,7 @@ from __future__ import annotations
 from mcp.server import MCPServer
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.mcpserver import Image
 
 from .api import collect_capacity
 from .auth import ApiKeyVerifier
@@ -17,6 +18,7 @@ INSTRUCTIONS = """\
 VMGateway leases fresh virtual machines (Linux, Windows, macOS) on the user's own hypervisors.
 Workflow: list_templates → create_vm (blocks until the VM has an IP) → use the returned
 connect hints / credentials (SSH, RDP or VNC) → destroy_vm as soon as you are done.
+screenshot_vm shows you the VM's screen without needing an RDP/VNC client.
 Leases expire automatically (default 2 h, max 72 h); call renew_vm for long jobs.
 Pick resources for the job: 2 vCPU / 4 GB is plenty for CLI tests and screenshots; give
 builds or IDEs 4+ vCPU / 8+ GB. Disk can only grow beyond the template default.
@@ -101,6 +103,18 @@ def build_mcp(mgr: LeaseManager) -> MCPServer:
         user = await caller()
         lease = await (mgr.wait(user, lease_id, min(wait_s, 1800)) if wait_s > 0 else mgr.get(user, lease_id))
         return lease_view(lease, include_key=True)
+
+    @mcp.tool(
+        description=(
+            "Capture the VM's screen (its console/desktop, even before anyone logs in) as a PNG image."
+            " Use it to see GUI state, verify that an app opened, or grab product screenshots."
+            " max_width downsizes wide screens (default 1600 px; 0 = full resolution)."
+        )
+    )
+    async def screenshot_vm(lease_id: str, max_width: int = 1600) -> Image:
+        user = await caller()
+        png = await mgr.screenshot(user, lease_id, max_width or None)
+        return Image(data=png, format="png")
 
     @mcp.tool(description="List your active leases (admins: all_users=true for everyone's).")
     async def list_vms(all_users: bool = False) -> list[dict]:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 
 from fastapi import APIRouter, Depends, FastAPI, Header, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from .auth import authenticate
@@ -99,6 +99,17 @@ async def get_lease(
     return lease_view(
         lease, include_secrets=lease.owner == user.name or user.is_admin, include_key=include_key
     )
+
+
+@router.get("/leases/{lease_id}/screenshot", response_class=Response)
+async def screenshot_lease(
+    lease_id: str,
+    max_width: int = 1600,
+    user: User = Depends(current_user),
+    mgr: LeaseManager = Depends(get_manager),
+):
+    png = await mgr.screenshot(user, lease_id, max_width or None)
+    return Response(png, media_type="image/png")
 
 
 @router.post("/leases/{lease_id}/renew")

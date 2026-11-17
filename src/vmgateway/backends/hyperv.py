@@ -128,11 +128,36 @@ if ($wantSsh) {
     $ssh = 'running'
   } else { $ssh = 'unavailable' }
 }
+# Keep the console awake so screenshots are never a blank screen.
+foreach ($k in 'monitor-timeout-ac', 'monitor-timeout-dc', 'standby-timeout-ac', 'standby-timeout-dc') { powercfg /change $k 0 }
 try {
   $max = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
   if ($max -gt (Get-Partition -DriveLetter C).Size + 1GB) { Resize-Partition -DriveLetter C -Size $max }
 } catch {}
 [pscustomobject]@{ ok = $true; ssh = $ssh; host = $env:COMPUTERNAME } | ConvertTo-Json -Compress
+"""
+
+
+SCREENSHOT_PS51 = r"""
+$ns = 'root/virtualization/v2'
+$vm = Get-WmiObject -Namespace $ns -Class Msvm_ComputerSystem -Filter "ElementName='__NAME__'"
+if (-not $vm) { throw 'VM not found' }
+$head = Get-WmiObject -Namespace $ns -Class Msvm_VideoHead | Where-Object { $_.SystemName -eq $vm.Name } | Select-Object -First 1
+$w = [int]$head.CurrentHorizontalResolution; $h = [int]$head.CurrentVerticalResolution
+if ($w -le 0 -or $h -le 0) { $w = 1024; $h = 768 }
+$vssd = $vm.GetRelated('Msvm_VirtualSystemSettingData') | Where-Object { $_.VirtualSystemType -eq 'Microsoft:Hyper-V:System:Realized' }
+$svc = Get-WmiObject -Namespace $ns -Class Msvm_VirtualSystemManagementService
+$r = $svc.GetVirtualSystemThumbnailImage($vssd, $w, $h)
+if ($r.ReturnValue -ne 0 -or -not $r.ImageData) { throw "thumbnail failed: $($r.ReturnValue)" }
+Add-Type -AssemblyName System.Drawing
+$bmp = New-Object System.Drawing.Bitmap($w, $h, [System.Drawing.Imaging.PixelFormat]::Format16bppRgb565)
+$bits = $bmp.LockBits((New-Object System.Drawing.Rectangle(0, 0, $w, $h)), 'WriteOnly', $bmp.PixelFormat)
+$n = [Math]::Min($r.ImageData.Length, $bits.Stride * $h)
+[System.Runtime.InteropServices.Marshal]::Copy([byte[]]$r.ImageData, 0, $bits.Scan0, $n)
+$bmp.UnlockBits($bits)
+$ms = New-Object System.IO.MemoryStream
+$bmp.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+[Convert]::ToBase64String($ms.ToArray())
 """
 
 
@@ -226,6 +251,9 @@ Set-VMKeyProtector -VMName $name -NewLocalKeyProtector
 Enable-VMTPM -VMName $name
 Set-VM -Name $name -AutomaticCheckpointsEnabled $false -CheckpointType Disabled
 Enable-VMIntegrationService -VMName $name -Name 'Guest Service Interface' -ErrorAction SilentlyContinue
+# Offline during OOBE: otherwise OOBE's Zero-Day-Patch step can install an update, reboot and
+# land on the interactive account page. PowerShell Direct needs no network; we connect it once ready.
+Disconnect-VMNetworkAdapter -VMName $name
 Start-VM -Name $name
 """
         try:
@@ -243,11 +271,37 @@ Start-VM -Name $name
         name = _check_name(ref.vm_id)
         deadline = time.monotonic() + timeout
         want_ssh = "$true" if "ssh" in template.endpoints else "$false"
-        probe = f"""
-$cred = [pscredential]::new({ps(creds.username)}, (ConvertTo-SecureString {ps(creds.password)} -AsPlainText -Force))
-Invoke-Command -VMName {ps(name)} -Credential $cred -ErrorAction Stop `
-  -ScriptBlock ([scriptblock]::Create({ps(GUEST_SETUP)})) -ArgumentList {want_ssh}, {ps(creds.ssh_public_key or "")}
-"""
+        cred = (
+            f"$cred = [pscredential]::new({ps(creds.username)},"
+            f" (ConvertTo-SecureString {ps(creds.password)} -AsPlainText -Force))\n"
+        )
+        # 1) Wait for OOBE to *finish*. The lease account can log on over PowerShell Direct while OOBE is
+        #    still running, so check Windows Setup's ImageState rather than mere logon success.
+        alive = cred + (
+            f"Invoke-Command -VMName {ps(name)} -Credential $cred -ErrorAction Stop -ScriptBlock {{"
+            " (Get-ItemProperty 'HKLM:/SOFTWARE/Microsoft/Windows/CurrentVersion/Setup/State').ImageState }"
+        )
+        state = ""
+        while True:
+            try:
+                state = (await self.ssh.run_ps(alive, timeout=120)).strip()
+                if "IMAGE_STATE_COMPLETE" in state:
+                    break
+            except BackendError as e:
+                state = str(e)[-200:]
+            if time.monotonic() > deadline:
+                raise BackendError(f"{name}: OOBE not finished within {timeout:.0f}s (last: {state})")
+            await asyncio.sleep(self.poll_s)
+        # 2) Now it is safe to give the guest a network.
+        await self.ssh.run_ps(
+            f"Connect-VMNetworkAdapter -VMName {ps(name)} -SwitchName {ps(self.cfg.switch)}", timeout=60
+        )
+        # 3) Configure RDP / OpenSSH / power settings inside the guest.
+        probe = cred + (
+            f"Invoke-Command -VMName {ps(name)} -Credential $cred -ErrorAction Stop `\n"
+            f"  -ScriptBlock ([scriptblock]::Create({ps(GUEST_SETUP)}))"
+            f" -ArgumentList {want_ssh}, {ps(creds.ssh_public_key or '')}\n"
+        )
         status = None
         last_err = ""
         while status is None:
@@ -292,6 +346,16 @@ Invoke-Command -VMName {ps(name)} -Credential $cred -ErrorAction Stop `
                 raise BackendError(f"{name}: {first.proto} via {first.host}:{first.port} not reachable")
             await asyncio.sleep(self.poll_s)
         return Access(ip=ip, endpoints=endpoints)
+
+    async def screenshot(self, ref: VMRef) -> bytes:
+        import base64
+
+        name = _check_name(ref.vm_id)
+        out = await self.ssh.run_ps51(SCREENSHOT_PS51.replace("__NAME__", name), timeout=60)
+        try:
+            return base64.b64decode(out.strip().splitlines()[-1])
+        except (ValueError, IndexError) as e:
+            raise BackendError(f"{name}: bad screenshot data") from e
 
     async def destroy(self, ref: VMRef) -> None:
         name = _check_name(ref.vm_id)

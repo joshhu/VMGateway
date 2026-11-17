@@ -69,6 +69,22 @@ class SSHRunner:
         encoded = base64.b64encode(full.encode("utf-16-le")).decode()
         return await self.run(f"pwsh -NoProfile -NonInteractive -EncodedCommand {encoded}", timeout, check)
 
+    async def run_ps51(self, script: str, timeout: float = 120, check: bool = True) -> str:
+        """Run a script in Windows PowerShell 5.1 (classic WMI methods that PowerShell 7's CIM can't call)."""
+        full = "$ErrorActionPreference = 'Stop'\n$ProgressPreference = 'SilentlyContinue'\n" + script
+        encoded = base64.b64encode(full.encode("utf-16-le")).decode()
+        return await self.run(
+            f"powershell.exe -NoProfile -NonInteractive -EncodedCommand {encoded}", timeout, check
+        )
+
+    async def open_tcp(self, host: str, port: int):
+        """Open a TCP connection from the remote host (SSH direct-tcpip). Returns (reader, writer)."""
+        conn = await self._connection()
+        try:
+            return await conn.open_connection(host, port)
+        except (OSError, asyncssh.Error) as e:
+            raise BackendError(f"{self.cfg.host}: cannot reach {host}:{port}: {e}") from e
+
     async def close(self) -> None:
         await self._reset()
 

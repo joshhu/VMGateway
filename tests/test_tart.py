@@ -88,7 +88,7 @@ async def test_provision(backend, runner):
     assert f"{T} clone gg-template vmgw-abc" in runner.cmds
     assert f"{T} set vmgw-abc --cpu 6 --memory 12288 --disk-size 120" in runner.cmds
     run = next(c for c in runner.cmds if "nohup" in c)
-    assert f"{T} run vmgw-abc --no-graphics --net-bridged=en0" in run and run.endswith("&")
+    assert f"{T} run vmgw-abc --no-graphics --vnc-experimental --net-bridged=en0" in run and run.endswith("&")
 
 
 async def test_disk_not_shrunk(backend, runner):

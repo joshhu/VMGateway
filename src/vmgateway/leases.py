@@ -252,6 +252,22 @@ class LeaseManager:
             await asyncio.wait_for(ev.wait(), timeout)
         return await self.get(user, lease_id)
 
+    async def screenshot(self, user: User, lease_id: str, max_width: int | None = 1600) -> bytes:
+        """PNG of the VM's console, optionally downscaled to max_width pixels."""
+        from .backends.vnc import downscale
+
+        lease = await self.get(user, lease_id)
+        if lease.state != LeaseState.READY or lease.ref is None:
+            raise GatewayError("not_ready", f"lease is {lease.state.value}", 409)
+        backend = self.backends[lease.ref.host]
+        if not hasattr(backend, "screenshot"):
+            raise GatewayError("unsupported", f"{backend.type} backend cannot take screenshots", 400)
+        try:
+            png = await backend.screenshot(lease.ref)
+        except Exception as e:
+            raise GatewayError("screenshot_failed", f"{type(e).__name__}: {e}", 502) from e
+        return await asyncio.to_thread(downscale, png, max_width)
+
     async def renew(self, user: User, lease_id: str, ttl_minutes: int) -> Lease:
         lease = await self.get(user, lease_id)
         if lease.state not in (LeaseState.PROVISIONING, LeaseState.READY):

@@ -39,6 +39,7 @@ class Backend(Protocol):
         """Block until the guest has an address and its first endpoint accepts TCP."""
         ...
 
+    # Optional: `async def screenshot(self, ref) -> bytes` returns the console as PNG.
     # Optional: backends serving `static` templates may implement
     #   async def set_credentials(self, ref, template, access, current, desired) -> Credentials
     # to create/modify the guest account after boot (user-chosen username/password).

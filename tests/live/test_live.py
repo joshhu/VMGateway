@@ -68,6 +68,12 @@ async def test_lease_end_to_end(tmp_path, template_id):
         assert lease.state == LeaseState.READY, lease.error
         if custom:
             assert (lease.credentials.username, lease.credentials.password) == (username, password)
+        shots = os.environ.get("VMGW_LIVE_SHOTS")  # directory to save a console screenshot into
+        if shots:
+            await asyncio.sleep(float(os.environ.get("VMGW_LIVE_SHOT_DELAY", "0")))
+            png = await mgr.screenshot(me, lease.id, max_width=1280)
+            (Path(shots) / f"{template_id}.png").write_bytes(png)
+            print(f"[{template_id}] screenshot {len(png)} bytes")
         if not any(e.proto == "ssh" for e in lease.access.endpoints):
             from vmgateway.backends.base import tcp_open
 

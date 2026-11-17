@@ -71,6 +71,10 @@ async def test_lease_lifecycle(client):
     assert (await client.get("/v1/leases?all=true", headers=auth(client, "bob"))).json() == []
     assert len((await client.get("/v1/leases?all=true", headers=auth(client, "root"))).json()) == 1
 
+    r = await client.get(f"/v1/leases/{lid}/screenshot", headers=auth(client))
+    assert r.status_code == 200 and r.headers["content-type"] == "image/png" and r.content[1:4] == b"PNG"
+    assert (await client.get(f"/v1/leases/{lid}/screenshot", headers=auth(client, "bob"))).status_code == 404
+
     r = await client.post(f"/v1/leases/{lid}/renew", json={"ttl_minutes": 600}, headers=auth(client))
     assert r.status_code == 200
 

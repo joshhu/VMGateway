@@ -62,6 +62,7 @@ async def test_tools_listed_with_template_catalog(gw):
         "list_vms",
         "renew_vm",
         "destroy_vm",
+        "screenshot_vm",
     }
     assert "ubuntu: Ubuntu 24.04" in tools["create_vm"].description
 
@@ -75,6 +76,9 @@ async def test_create_get_destroy(gw):
         assert payload(await c.call_tool("list_vms", {}))[0]["id"] == vm["id"]
         got = payload(await c.call_tool("get_vm", {"lease_id": vm["id"]}))
         assert got["ip"] == vm["ip"]
+        shot = await c.call_tool("screenshot_vm", {"lease_id": vm["id"]})
+        assert not shot.is_error
+        assert shot.content[0].type == "image" and shot.content[0].mime_type == "image/png"
         done = payload(await c.call_tool("destroy_vm", {"lease_id": vm["id"]}))
         assert done["state"] == "released"
 

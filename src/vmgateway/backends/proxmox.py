@@ -208,6 +208,20 @@ class ProxmoxBackend:
             if time.monotonic() > deadline:
                 raise BackendError(f"{ref.name}: {first.proto} port {first.port} on {ip} not reachable")
             await asyncio.sleep(self.poll_s)
+        if template.os == "windows":
+            # Keep the console awake so screenshots are never a blank screen (best effort).
+            try:
+                await self._guest_exec(
+                    ref,
+                    [
+                        "cmd.exe",
+                        "/c",
+                        "powercfg /change monitor-timeout-ac 0 & powercfg /change standby-timeout-ac 0",
+                    ],
+                    timeout=60,
+                )
+            except BackendError as e:
+                log.info("pve %s: could not disable display timeout: %s", ref.name, e)
         return Access(ip=ip, endpoints=endpoints)
 
     async def _guest_exec(self, ref: VMRef, argv: list[str], timeout: float = 180) -> str:
@@ -253,6 +267,39 @@ foreach ($sid in 'S-1-5-32-544', 'S-1-5-32-555') {{
         if "ok" not in out:
             raise BackendError(f"setting credentials failed: {out[-300:]}")
         return Credentials(username=desired.username, password=desired.password)
+
+    async def screenshot(self, ref: VMRef) -> bytes:
+        import ssl
+
+        from websockets.asyncio.client import connect
+
+        from .vnc import WebSocketStream, capture
+
+        vm = self.api.nodes(ref.node).qemu(int(ref.vm_id))
+        proxy = await self._q(vm.vncproxy.post, websocket=1)
+        u = urlparse(self.cfg.url)
+        url = (
+            f"wss://{u.hostname}:{u.port or 8006}/api2/json/nodes/{ref.node}/qemu/{ref.vm_id}/vncwebsocket"
+            f"?port={proxy['port']}&vncticket={quote(proxy['ticket'], safe='')}"
+        )
+        ctx = ssl.create_default_context()
+        if not self.cfg.verify_ssl:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        auth = f"PVEAPIToken={self.cfg.token_id}={self.cfg.token_secret.get_secret_value()}"
+        try:
+            async with connect(
+                url,
+                additional_headers={"Authorization": auth},
+                ssl=ctx,
+                subprotocols=["binary"],
+                max_size=None,
+            ) as ws:
+                return await capture(WebSocketStream(ws), proxy["ticket"])
+        except BackendError:
+            raise
+        except Exception as e:
+            raise BackendError(f"PVE VNC: {e}") from e
 
     async def destroy(self, ref: VMRef) -> None:
         vm = self.api.nodes(ref.node).qemu(int(ref.vm_id))

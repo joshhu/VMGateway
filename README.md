@@ -29,6 +29,9 @@ Agents never see hypervisor passwords, host IPs or API tokens. Each user has an 
 - **Scheduling.** Picks the node with the most free memory, respects per-node `max_vms` and Apple's
   two-running-macOS-VMs limit (counting VMs the gateway did not create).
 - **Multi-user.** Per-user API keys (stored hashed), per-user lease quotas, admins see everything.
+- **Screenshots.** `screenshot_vm` returns the VM's console as an image, even before anyone logs in:
+  PVE through its VNC websocket, Tart through Virtualization.framework's VNC server, Hyper-V through WMI.
+  Agents can see GUI state without an RDP/VNC client. Displays are kept awake so captures are never blank.
 - **MCP + REST.** MCP over Streamable HTTP at `/mcp` (official Python SDK v2), REST at `/v1`.
 
 ## Quick start
@@ -88,14 +91,27 @@ source per node in the template's `sources`. Windows templates need the QEMU gue
 - Bridged networking (`bridged_interface: en0`) gives VMs LAN addresses agents can reach.
 - IPs are discovered via the Tart guest agent, falling back to ARP.
 - For macOS templates with a `vnc` endpoint, the gateway turns on Screen Sharing in each new VM.
+- VMs run with `--vnc-experimental` (host-side VNC, no window on the Mac) so `screenshot_vm` works for
+  every guest; the gateway reaches it through its SSH connection.
 
 ### Hyper-V (Windows host)
 
 - Enable OpenSSH Server, make PowerShell 7 available, and authorize the gateway's key for an account in
   *Hyper-V Administrators* and *Administrators*.
 - Template: a generalized (OOBE) Windows VHDX. Mark it read-only; every VM is a differencing disk on top.
-- The gateway writes `unattend.xml` into the new disk (skip OOBE, create the lease's admin account), then
-  uses PowerShell Direct to wait for the guest and enable RDP (and OpenSSH if requested).
+- The gateway writes `unattend.xml` into the new disk (skip OOBE, create the lease's admin account), boots
+  it with the network **disconnected** (otherwise OOBE may install a zero-day update, reboot and stop at the
+  interactive account page), waits over PowerShell Direct, connects the network, then enables RDP (and
+  OpenSSH if requested).
+- OpenSSH from Windows Update takes minutes on every first boot. Bake it into the template once:
+
+  ```powershell
+  pwsh -File scripts/hyperv/build-openssh-template.ps1 `
+    -SourceVhdx C:\VMs\Templates\win11.vhdx -OutVhdx C:\VMs\Templates\win11-openssh.vhdx -Locale en-US
+  ```
+
+  It boots a throw-away VM, installs OpenSSH Server, removes its temporary account, runs
+  `sysprep /generalize /oobe`, and merges the result into a new read-only VHDX. The source is untouched.
 - With a NAT switch (`Default Switch`), each lease gets ports from `port_range` forwarded from
   `public_ip` with `netsh interface portproxy`, plus a firewall rule named after the VM.
 
@@ -128,6 +144,7 @@ Credential modes:
 | `get_vm(lease_id, wait_s?)` | state, IP, endpoints, credentials, connect hints |
 | `list_vms(all_users?)` | your active leases |
 | `renew_vm(lease_id, ttl_minutes)` | extend |
+| `screenshot_vm(lease_id, max_width=1600)` | the VM's screen as a PNG image |
 | `destroy_vm(lease_id)` | end the lease now |
 
 ## REST API
@@ -142,6 +159,7 @@ All endpoints except `/healthz` need `Authorization: Bearer <api key>`.
 | GET | `/v1/leases` | your active leases (`?all=true` for admins, `?include_inactive=true`) |
 | GET | `/v1/leases/{id}` | details (`?include_key=true` returns the SSH private key, `?wait_s=` blocks) |
 | POST | `/v1/leases/{id}/renew` | `{ttl_minutes}` |
+| GET | `/v1/leases/{id}/screenshot` | PNG of the console (`?max_width=`, `0` = full size) |
 | DELETE | `/v1/leases/{id}` | destroy |
 
 Errors are JSON: `{"error": "no_capacity", "detail": "..."}`.
