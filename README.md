@@ -1,19 +1,110 @@
-# VMGateway
+# VMGateway：讓 Agent 有使用任何作業系統的自由
 
 **繁體中文** | [English](README.en.md)
 
-讓你的 coding agent 隨時拿到任何作業系統的乾淨 VM。
-
-VMGateway 是一個以「租約（lease）」為核心的小型服務，放在 AI agent（Claude Code，或任何會講 MCP / HTTP 的程式）和你自己的虛擬化主機之間。Agent 只要說「給我一台 Windows 11 on ARM，4 vCPU、8 GB，用兩個小時」，Gateway 就會挑一台有空間的主機、從範本 clone 一台 VM、設定好全新的帳密、等到能連線，再把 IP、連接埠和登入資訊交回去。租約一到，VM 自動刪除。
-
-Agent 看不到任何虛擬化主機的密碼、主機 IP 或 API token，每個使用者只拿到一把自己的 API key。
+把你的虛擬化平台叢集變成一個服務。Claude Code（或任何會講 MCP / HTTP 的 agent）說一句「給我一台 Windows 11 on ARM」，幾秒到幾分鐘後就拿到一台全新的 VM、IP 和帳密，用完自動銷毀。
 
 <p align="center">
   <img src="docs/images/architecture.zh-TW.svg" alt="VMGateway 架構：agent 透過 MCP 或 REST 向 Gateway 租 VM，Gateway 在 Proxmox VE、Tart、Hyper-V 上建立 VM，agent 再直接用 SSH、RDP、VNC 連進 VM" width="100%">
 </p>
 
+## 為什麼需要這個
+
+雖然已經進入 Agentic Coding 的時代，軟體相容性還是得測。不管程式是 Claude Code 還是其他 coding agent 寫的，最後都要能在目標平台上跑起來。手機 App 有各平台的模擬器可以用，但如果你寫的是跨平台應用程式，你會希望 agent 在工作時，隨時都能自己開一台某種作業系統的機器來測試。
+
+以前的做法是準備好幾台不同作業系統的實體主機。問題是實體機沒辦法用軟體控制，不能隨意伸縮、開關機或搬移，所以虛擬機普及之後，大部分的軟體測試都改用 VM 了。
+
+現在把這件事交給 agent：讓 coding agent 能隨時開一台 VM、管理它的生命週期，再加上 Computer Use 或截圖，agent 的能力就整個不一樣了。想像你的 Claude Code 背後有無數台可以隨時開關、隨時操作、各種作業系統的電腦，甚至可以讓它管理一整個由異質作業系統組成的叢集。
+
+## 做法
+
+**1. 先準備好各作業系統的範本，再用無人值守的方式 clone。**
+每個平台各自建好範本（Linux 用 cloud-init 範本、Windows 用 generalize 過的映像、macOS 用設定好的 Tart VM）。之後 agent 要新的作業系統時，就從範本 clone 一份，再用該作業系統的無人值守機制（cloud-init、unattend.xml）設定帳密和網路，幾秒鐘到幾分鐘就有一台全新的 VM 可以用。
+
+**2. 在 agent 和叢集之間放一個 Gateway。**
+Agent 只跟 Gateway 講話：「我要哪個作業系統、多少 CPU / 記憶體 / 硬碟、用多久」。Gateway 負責找一台有空間的主機、下指令建立 VM，再把 IP 和帳密交回給 agent。不管底下是 PVE、Mac 上的 Tart 還是 Hyper-V，對 agent 來說都是同一套介面。這件事做一次，之後所有 agent 都能用。
+
+**3. 做成以租約（lease）為核心的服務，而不是把帳密丟給 agent。**
+最簡單的做法，是把各平台的帳號密碼放進 `.env`，讓 Claude Code 自己 SSH 進去下指令管理 VM。這在一個人用的時候可行，但多人使用就會有問題：
+
+| | 帳密放 `.env`，agent 自己 SSH 管理 | VMGateway |
+|---|---|---|
+| Agent 知道的東西 | 每台虛擬化主機的 IP、root 帳密、API token | 只有一把自己的 API key |
+| 換平台 | 每個平台的指令都不一樣，agent 要各自學 | 同一個 `create_vm`，只換範本名稱 |
+| 用完沒關 | VM 一直開著佔資源 | 租約到期自動銷毀，Gateway 當機留下的孤兒 VM 也會被清掉 |
+| 多人共用 | 大家共用同一組 root 帳密 | 每人一把 key、各自有數量上限，可以隨時撤銷 |
+| 主機挑選 | agent 自己判斷哪台有空 | Gateway 依剩餘記憶體自動挑，還會遵守 macOS 的授權限制 |
+
+所以使用者不需要知道任何虛擬化平台的帳密或 IP，只要透過 MCP 或 REST，就能指定作業系統、平台、帳密、硬體規格，而且每台 VM 都有 TTL 和回收機制。
+
+## 實際用起來是什麼樣子
+
+我因為寫作，常常要擷取不同作業系統裡的產品畫面或操作過程，這些現在都是 agent 幫我抓。需要的時候，agent 會透過 Gateway 自己開出需要的 VM，自己判斷大概需要多少硬碟、CPU 和記憶體，截完圖就把 VM 銷毀。
+
+例如在 Claude Code 裡說：
+
+> 開一台 Windows 11 ARM，打開設定 App 截圖給我，截完把 VM 刪掉。
+
+Agent 會自己做完這幾步：
+
+1. `list_templates`：看有哪些作業系統可以選，挑到 `win11-arm`。
+2. `create_vm`：Gateway 挑一台主機建立 VM，等到能連線後回傳 IP、RDP 埠和帳密。
+3. `screenshot_vm`：直接拿到 VM 的螢幕畫面，不需要裝 RDP client。
+4. `destroy_vm`：用完立刻刪除；就算 agent 忘了，租約到期（預設 2 小時）也會自動刪除。
+
+## 我的環境
+
+VMGateway 是照我自己的環境寫的，下面是它目前實際在管的東西：
+
+| 平台 | 硬體 | 提供的作業系統 |
+|---|---|---|
+| [Proxmox VE](https://www.proxmox.com/) 叢集 | 多台實體機組成的 PVE Cluster，可以自動挑選比較空閒的節點 | Windows、Linux（x86_64） |
+| [Tart](https://tart.run/) | Mac mini（Tart 使用蘋果內建的 Virtualization.framework） | macOS、Linux（ARM64） |
+| Hyper-V | 一台 128 GB 記憶體的 RTX Spark | Windows on ARM |
+
+加上 cloud-init、unattend.xml 這些無人值守的安裝方式，市面上主要的平台和作業系統幾乎都涵蓋了。Gateway 本身是放在 PVE 上的一台小 Linux VM，用 Docker 跑。
+
+實測過 Claude Code 和 Pi Agent 都能直接使用。
+
+## 什麼時候適合用
+
+- **適合：** 需要測試跨平台軟體、擷取不同作業系統的畫面、讓 agent 在乾淨環境裡驗證安裝流程，或公司內多人共用一組虛擬化資源。架構比較大，但部署一次後全公司都能用。
+- **不需要：** 容器這種比較輕量的東西，不必動用虛擬化平台，直接跑在 agent 所在的電腦上就好。
+
+## 快速開始
+
+這個專案是照我的環境寫的，不一定適合每個人。clone 下來之後，**建議直接讓 Claude Code 幫你調整成你自己的參數**（Gateway 的 IP、要放在哪台機器、有哪些主機和範本）。
+
+**1. Clone 並請 Claude Code 幫你設定**
+
+```bash
+git clone https://github.com/joshhu/VMGateway && cd VMGateway
+claude
+```
+
+然後跟它說，例如：
+
+> 讀 README 和 config.example.yaml，幫我建立 config.yaml 和 .env。我的 PVE 在 https://pve.lan:8006，有一台 Mac mini 跑 Tart，Gateway 要部署在 PVE 上的一台 Linux VM 用 Docker 跑。
+
+Claude Code 會照[給管理員：安裝與部署](#給管理員安裝與部署)的步驟，幫你建立 PVE token 和範本、產生設定檔、部署 Gateway。
+
+**2. 建立第一把管理員 key**
+
+```bash
+docker compose exec vmgateway vmgw user add <你的名字> --admin   # 印出 key，只顯示一次
+```
+
+**3. 把 Gateway 接到 Claude Code**
+
+```bash
+claude mcp add --transport http --scope user vmgw http://<gateway>:8000/mcp --header "Authorization: Bearer <key>"
+```
+
+之後要給其他電腦或同事用，直接跟 Claude Code 說「幫我建一把 VMGateway 的 key 給筆電用」，它會回你一行可以直接貼上的安裝指令，見[管理 API key](#管理-api-key)。
+
 ## 目錄
 
+- [為什麼需要這個](#為什麼需要這個) · [做法](#做法) · [實際用起來是什麼樣子](#實際用起來是什麼樣子) · [我的環境](#我的環境) · [快速開始](#快速開始)
 - [功能](#功能)
 - [運作方式](#運作方式)
 - [給使用者：開始使用](#給使用者開始使用)
